@@ -1,0 +1,32 @@
+name: PEA-CORE Docs Check
+
+on:
+  pull_request:
+    paths:
+      - 'pea-core/**'
+      - '.github/workflows/pea-core-docs-check.yml'
+  push:
+    paths:
+      - 'pea-core/**'
+      - '.github/workflows/pea-core-docs-check.yml'
+
+jobs:
+  docs-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify PEA-CORE docs exist
+        run: |
+          test -f pea-core/README.md
+          test -f pea-core/AGENT_BLUEPRINTS.md
+          test -f pea-core/SECURITY_AND_GOVERNANCE.md
+          test -f pea-core/V0_7_IMPLEMENTATION_SPRINT.md
+
+      - name: Check no obvious secrets in PEA-CORE docs
+        run: |
+          if grep -RInE '(sk-[A-Za-z0-9]|OPENAI_API_KEY=|PASSWORD=|SECRET_KEY=|BEGIN PRIVATE KEY)' pea-core; then
+            echo 'Potential secret detected in pea-core docs.'
+            exit 1
+          fi
